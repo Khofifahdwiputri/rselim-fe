@@ -226,51 +226,69 @@ $data = json_decode($response);
           <hr class="mx-auto my-3" style="width: 80px; border: 2px solid #0d6efd;">
         </div>
 
-        <?php
-        // Loop semua dokter
-        foreach ($data->data[0]->dokter as $dokter):
-          // Ambil URL foto dokter, gunakan medium jika ada, jika tidak pakai original
-          $fotoUrl = isset($dokter->fotoDokter->formats->medium->url)
-            ? $dokter->fotoDokter->formats->medium->url
-            : $dokter->fotoDokter->url;
-          ?>
+        <?php if (!empty($data->data)): ?>
+          <?php foreach ($data->data as $poli): // Loop setiap poliklinik ?>
 
-          <!-- Gambar Dokter -->
-          <div class="mb-4">
-            <img src="http://localhost:1337<?php echo $fotoUrl; ?>" alt="<?php echo $dokter->nama ?? 'Dokter'; ?>"
-              class="img-fluid rounded shadow" style="max-width:600px;">
-          </div>
+            <?php if (!empty($poli->dokter)): ?>
+              <?php foreach ($poli->dokter as $dokter): // Loop setiap dokter ?>
 
-          <!-- Informasi Dokter -->
-          <div class="text-start d-inline-block">
-            <!-- Nama Dokter -->
-            <?php if (!empty($dokter->nama)): ?>
-              <h4><strong>Nama Dokter:</strong> <?php echo $dokter->nama; ?></h4>
-            <?php endif; ?>
+                <?php
+                // Ambil URL foto dokter (gunakan medium jika ada)
+                $fotoUrl = null;
+                if (isset($dokter->fotoDokter->formats->medium->url)) {
+                  $fotoUrl = $dokter->fotoDokter->formats->medium->url;
+                } elseif (isset($dokter->fotoDokter->url)) {
+                  $fotoUrl = $dokter->fotoDokter->url;
+                }
+                ?>
 
-            <!-- Jadwal -->
-            <?php if (!empty($dokter->jadwal)): ?>
-              <h4><strong>Jadwal:</strong></h4>
-              <?php foreach ($dokter->jadwal as $j): ?>
-                <p><?php echo $j->jadwalDokter; ?></p>
+                <div class="mb-4 p-3 border rounded shadow-sm bg-light">
+                  <!-- Foto Dokter -->
+                  <?php if ($fotoUrl): ?>
+                    <div class="mb-3 text-center">
+                      <img src="http://localhost:1337<?php echo $fotoUrl; ?>"
+                        alt="<?php echo htmlspecialchars($dokter->nama ?? 'Dokter'); ?>" class="img-fluid rounded shadow"
+                        style="max-width:300px;">
+                    </div>
+                  <?php endif; ?>
+
+                  <!-- Informasi Dokter -->
+                  <div class="text-start">
+                    <?php if (!empty($dokter->nama)): ?>
+                      <h4><strong>Nama Dokter:</strong> <?php echo htmlspecialchars($dokter->nama); ?></h4>
+                    <?php endif; ?>
+
+                    <!-- Jadwal -->
+                    <?php if (!empty($dokter->jadwal)): ?>
+                      <h5><strong>Jadwal:</strong></h5>
+                      <?php foreach ($dokter->jadwal as $j): ?>
+                        <p><?php echo htmlspecialchars($j->jadwalDokter); ?></p>
+                      <?php endforeach; ?>
+                    <?php else: ?>
+                      <p><em>Jadwal belum tersedia</em></p>
+                    <?php endif; ?>
+
+                    <!-- Layanan -->
+                    <?php if (!empty($dokter->daftarLayanan)): ?>
+                      <h5><strong>Layanan:</strong></h5>
+                      <ul>
+                        <?php foreach ($dokter->daftarLayanan as $layanan): ?>
+                          <li><?php echo htmlspecialchars($layanan->layanan); ?></li>
+                        <?php endforeach; ?>
+                      </ul>
+                    <?php endif; ?>
+                  </div>
+                </div>
+
+                <hr>
+
               <?php endforeach; ?>
             <?php endif; ?>
 
-            <!-- Layanan -->
-            <?php if (!empty($dokter->daftarLayanan)): ?>
-              <h4><strong>Layanan:</strong></h4>
-              <ul>
-                <?php foreach ($dokter->daftarLayanan as $layanan): ?>
-                  <li><?php echo $layanan->layanan; ?></li>
-                <?php endforeach; ?>
-              </ul>
-            <?php endif; ?>
-          </div>
-
-          <hr>
-
-        <?php endforeach; ?>
-
+          <?php endforeach; ?>
+        <?php else: ?>
+          <p>Tidak ada data dokter yang ditemukan.</p>
+        <?php endif; ?>
 
     </div>
   </main>
