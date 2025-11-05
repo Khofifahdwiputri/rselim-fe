@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+<?php
+$url = 'http://localhost:1337/api/poliklinik-akupunkturs?populate[dokter][populate]=*';
+$response = file_get_contents($url);
 
+$data = json_decode($response);
+?>
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
@@ -187,25 +192,135 @@
 
 <div class="container">
   <!-- Dokter 1 -->
-<div class="row align-items-center mb-5">
-  <div class="col-md-4 text-center">
-    <img src="assets/img/akupunktur.png" 
-         alt="dr. Griselda Tanumas" 
-         class="img-fluid rounded shadow"
-         style="max-width: 250px; height: auto;">
+<?php
+// Ambil data dokter dari objek $data (asumsinya hanya 1 dokter)
+if (!empty($data->data) && !empty($data->data[0]->dokter[0])) {
+  $dokter = $data->data[0]->dokter[0];
+  
+  // Ambil URL foto dokter
+  $fotoUrl = null;
+  if (isset($dokter->fotoDokter->formats->medium->url)) {
+    $fotoUrl = $dokter->fotoDokter->formats->medium->url;
+  } elseif (isset($dokter->fotoDokter->url)) {
+    $fotoUrl = $dokter->fotoDokter->url;
+  }
+}
+?>
+
+<style>
+  .dokter-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    padding: 40px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    max-width: 900px;
+    margin: 40px auto;
+  }
+
+  .dokter-foto img {
+    width: 260px;
+    height: 340px;
+    object-fit: cover;
+    border-radius: 16px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  }
+
+  .dokter-info h4 {
+    font-weight: 700;
+    color: #003344;
+    margin-bottom: 15px;
+  }
+
+  .dokter-info h6 {
+    font-weight: 600;
+    color: #0d6efd;
+    margin-bottom: 6px;
+  }
+
+  .dokter-info ul {
+    margin: 0 0 10px 20px;
+    padding: 0;
+  }
+
+  .dokter-info li {
+    line-height: 1.6;
+  }
+
+  @media (max-width: 768px) {
+    .dokter-container {
+      flex-direction: column;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .dokter-foto img {
+      width: 200px;
+      height: 260px;
+      margin-bottom: 15px;
+    }
+
+    .dokter-info {
+      text-align: left;
+    }
+  }
+</style>
+
+<?php if (!empty($dokter)): ?>
+  <!-- Judul halaman hanya nama poliklinik -->
+  <h2 class="text-center fw-bold mt-5 mb-4 text-dark">
+    <?= htmlspecialchars($data->data[0]->namaPoli ?? ''); ?>
+  </h2>
+  <hr class="mx-auto mb-5" style="width: 160px; border: 2px solid #cde0ff;">
+
+  <div class="dokter-container">
+    <!-- Foto Dokter -->
+    <div class="dokter-foto">
+      <?php if ($fotoUrl): ?>
+        <img src="http://localhost:1337<?= htmlspecialchars($fotoUrl); ?>" 
+             alt="<?= htmlspecialchars($dokter->nama ?? 'Dokter'); ?>">
+      <?php else: ?>
+        <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded"
+             style="width:260px;height:340px;">Tidak ada foto</div>
+      <?php endif; ?>
+    </div>
+
+    <!-- Info Dokter -->
+    <div class="dokter-info">
+      <h4><?= htmlspecialchars($dokter->nama ?? 'Nama Dokter'); ?></h4>
+
+      <!-- Jadwal -->
+      <div class="mb-3">
+        <h6>Jadwal :</h6>
+        <?php if (!empty($dokter->jadwal)): ?>
+          <?php foreach ($dokter->jadwal as $j): ?>
+            <p><?= htmlspecialchars($j->jadwalDokter); ?></p>
+          <?php endforeach; ?>
+        <?php else: ?>
+          <p class="text-muted fst-italic mb-0">Belum ada jadwal</p>
+        <?php endif; ?>
+      </div>
+
+      <!-- Layanan -->
+      <?php if (!empty($dokter->daftarLayanan)): ?>
+        <div>
+          <h6>Layanan:</h6>
+          <ul>
+            <?php foreach ($dokter->daftarLayanan as $layanan): ?>
+              <li><?= htmlspecialchars($layanan->layanan); ?></li>
+            <?php endforeach; ?>
+          </ul>
+        </div>
+      <?php endif; ?>
+    </div>
   </div>
-  <div class="col-md-8 text-start">
-    <h4 class="fw-bold">dr. Griselda Tanumas, Sp.Ak</h4>
-    <p class="mb-2"><strong>Jadwal :</strong><br>
-      Senin, Rabu, Jumat : Pukul 15.00 – 17.00 WITA
-    </p>
-    <p class="mb-2"><strong>Layanan:</strong><br>
-      Konsultasi Akupunktur Manual<br>
-      Elektroakupunktur<br>
-      Akupunktur Thread Embedding<br>
-    </p>
-  </div>
-</div>
+
+<?php else: ?>
+  <p class="text-center text-muted my-5">Tidak ada data dokter yang ditemukan.</p>
+<?php endif; ?>
 </div>
 
 <!-- Section Title -->

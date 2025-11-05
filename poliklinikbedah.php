@@ -1,5 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+<?php
+$url = 'http://localhost:1337/api/poliklinik-bedahs?populate[dokter][populate]=*';
+$response = file_get_contents($url);
+
+$data = json_decode($response);
+?>
 
 <head>
   <meta charset="utf-8">
@@ -187,72 +193,96 @@
 
 <div class="container">
   <!-- Dokter 1 -->
-<div class="row align-items-center mb-5">
-  <div class="col-md-4 text-center">
-    <img src="assets/img/bedah1.png" alt="dr. J. Palimbong" 
-         class="img-fluid rounded shadow doctor-img">
-  </div>
-  <div class="col-md-8 text-start">
-    <h4 class="fw-bold">dr. J. Palimbong, Sp.B</h4>
-    <p class="mb-2"><strong>Jadwal :</strong><br>
-      Senin – Rabu : Pukul 08.00 – 11.00 WITA
-    </p>
-    <p class="mb-2"><strong>Layanan:</strong><br>
-      Konsultasi<br>
-    </p>
-  </div>
+<?php if (!empty($data->data)): ?>
+  <?php foreach ($data->data as $poli): // Loop setiap poliklinik ?>
+    <?php if (!empty($poli->dokter)): ?>
+
+      <h3 class="text-center mb-5 fw-bold text-primary">
+        Poliklinik <?php echo htmlspecialchars($poli->namaPoli ?? ''); ?>
+      </h3>
+
+      <div class="container">
+        <?php foreach ($poli->dokter as $dokter): ?>
+
+          <?php
+          // Ambil URL foto dokter
+          $fotoUrl = null;
+          if (isset($dokter->fotoDokter->formats->medium->url)) {
+            $fotoUrl = $dokter->fotoDokter->formats->medium->url;
+          } elseif (isset($dokter->fotoDokter->url)) {
+            $fotoUrl = $dokter->fotoDokter->url;
+          }
+          ?>
+
+          <div class="card mb-4 shadow-sm border-0 p-3">
+            <div class="row align-items-center g-3">
+
+              <!-- Foto Dokter -->
+              <div class="col-md-3 text-center">
+                <?php if ($fotoUrl): ?>
+                  <img src="http://localhost:1337<?php echo $fotoUrl; ?>"
+                       alt="<?php echo htmlspecialchars($dokter->nama ?? 'Dokter'); ?>"
+                       class="img-fluid rounded shadow-sm"
+                       style="width: 230px; height: 280px; object-fit: cover;">
+                <?php else: ?>
+                  <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded"
+                       style="width: 230px; height: 280px;">
+                    <span>Tidak ada foto</span>
+                  </div>
+                <?php endif; ?>
+              </div>
+
+              <!-- Informasi Dokter -->
+              <div class="col-md-9">
+                <div class="card-body">
+
+                  <?php if (!empty($dokter->nama)): ?>
+                    <h4 class="fw-bold mb-3 text-dark">
+                      <?php echo htmlspecialchars($dokter->nama); ?>
+                    </h4>
+                  <?php endif; ?>
+
+                  <!-- Jadwal -->
+                  <div class="mb-3">
+                    <h6 class="fw-bold text-primary mb-1">Jadwal:</h6>
+                    <?php if (!empty($dokter->jadwal)): ?>
+                      <ul class="mb-0">
+                        <?php foreach ($dokter->jadwal as $j): ?>
+                          <li><?php echo htmlspecialchars($j->jadwalDokter); ?></li>
+                        <?php endforeach; ?>
+                      </ul>
+                    <?php else: ?>
+                      <p><em>Jadwal belum tersedia</em></p>
+                    <?php endif; ?>
+                  </div>
+
+                  <!-- Layanan -->
+                  <?php if (!empty($dokter->daftarLayanan)): ?>
+                    <div>
+                      <h6 class="fw-bold text-primary mb-1">Layanan:</h6>
+                      <ul class="mb-0">
+                        <?php foreach ($dokter->daftarLayanan as $layanan): ?>
+                          <li><?php echo htmlspecialchars($layanan->layanan); ?></li>
+                        <?php endforeach; ?>
+                      </ul>
+                    </div>
+                  <?php endif; ?>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+        <?php endforeach; ?>
+      </div>
+
+    <?php endif; ?>
+  <?php endforeach; ?>
+<?php else: ?>
+  <p class="text-center">Tidak ada data dokter yang ditemukan.</p>
+<?php endif; ?>
 </div>
 
-<!-- Dokter 2 -->
-<div class="row align-items-center mb-5">
-  <div class="col-md-4 text-center">
-    <img src="assets/img/bedah2.png" alt="dr. Marsino S. Manapa" 
-         class="img-fluid rounded shadow doctor-img">
-  </div>
-  <div class="col-md-8 text-start">
-    <h4 class="fw-bold">dr. Marsino S. Manapa, Sp.B, M.Kes.</h4>
-    <p class="mb-2"><strong>Jadwal :</strong><br>
-      Selasa & Kamis : Pukul 14.15 – 17.00 WITA<br>
-    </p>
-    <p class="mb-2"><strong>Layanan:</strong><br>
-      Konsultasi<br>
-    </p>
-  </div>
-</div>
-
-<!-- Dokter 3 -->
-<div class="row align-items-center mb-5">
-  <div class="col-md-4 text-center">
-    <img src="assets/img/bedah3.png" alt="dr. Syafari D. Mangopo" 
-         class="img-fluid rounded shadow doctor-img">
-  </div>
-  <div class="col-md-8 text-start">
-    <h4 class="fw-bold">dr. Syafari D. Mangopo, Sp.B, M.Kes.</h4>
-    <p class="mb-2"><strong>Jadwal :</strong><br>
-      Jumat : Pukul 08.30 – 12.00 WITA<br>
-    </p>
-    <p class="mb-2"><strong>Layanan:</strong><br>
-      Konsultasi<br>
-    </p>
-  </div>
-</div>
-
-<!-- Dokter 4 -->
-<div class="row align-items-center mb-5">
-  <div class="col-md-4 text-center">
-    <img src="assets/img/bedah4.png" alt="dr. Fransisca Duma" 
-         class="img-fluid rounded shadow doctor-img">
-  </div>
-  <div class="col-md-8 text-start">
-    <h4 class="fw-bold">dr. Fransisca Duma, Sp.B</h4>
-    <p class="mb-2"><strong>Jadwal :</strong><br>
-      Sabtu : Pukul 14.15 – 17.15 WITA<br>
-    </p>
-    <p class="mb-2"><strong>Layanan:</strong><br>
-      Konsultasi<br>
-    </p>
-  </div>
-</div>
 
 
 <!-- Section Title -->

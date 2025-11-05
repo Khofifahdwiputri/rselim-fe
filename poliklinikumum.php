@@ -225,73 +225,137 @@ $data = json_decode($response);
 
           <hr class="mx-auto my-3" style="width: 80px; border: 2px solid #0d6efd;">
         </div>
+<!-- mulai -->
+ <?php
+// Ambil data dokter dari objek $data (asumsinya hanya 1 dokter)
+if (!empty($data->data) && !empty($data->data[0]->dokter[0])) {
+  $dokter = $data->data[0]->dokter[0];
+  
+  // Ambil URL foto dokter
+  $fotoUrl = null;
+  if (isset($dokter->fotoDokter->formats->medium->url)) {
+    $fotoUrl = $dokter->fotoDokter->formats->medium->url;
+  } elseif (isset($dokter->fotoDokter->url)) {
+    $fotoUrl = $dokter->fotoDokter->url;
+  }
+}
+?>
 
-        <?php if (!empty($data->data)): ?>
-          <?php foreach ($data->data as $poli): // Loop setiap poliklinik ?>
+<style>
+  .dokter-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    padding: 40px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    max-width: 900px;
+    margin: 40px auto;
+  }
 
-            <?php if (!empty($poli->dokter)): ?>
-              <?php foreach ($poli->dokter as $dokter): // Loop setiap dokter ?>
+  .dokter-foto img {
+    width: 260px;
+    height: 340px;
+    object-fit: cover;
+    border-radius: 16px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  }
 
-                <?php
-                // Ambil URL foto dokter (gunakan medium jika ada)
-                $fotoUrl = null;
-                if (isset($dokter->fotoDokter->formats->medium->url)) {
-                  $fotoUrl = $dokter->fotoDokter->formats->medium->url;
-                } elseif (isset($dokter->fotoDokter->url)) {
-                  $fotoUrl = $dokter->fotoDokter->url;
-                }
-                ?>
+  .dokter-info h4 {
+    font-weight: 700;
+    color: #003344;
+    margin-bottom: 15px;
+  }
 
-                <div class="mb-4 p-3 border rounded shadow-sm bg-light">
-                  <!-- Foto Dokter -->
-                  <?php if ($fotoUrl): ?>
-                    <div class="mb-3 text-center">
-                      <img src="http://localhost:1337<?php echo $fotoUrl; ?>"
-                        alt="<?php echo htmlspecialchars($dokter->nama ?? 'Dokter'); ?>" class="img-fluid rounded shadow"
-                        style="max-width:300px;">
-                    </div>
-                  <?php endif; ?>
+  .dokter-info h6 {
+    font-weight: 600;
+    color: #0d6efd;
+    margin-bottom: 6px;
+  }
 
-                  <!-- Informasi Dokter -->
-                  <div class="text-start">
-                    <?php if (!empty($dokter->nama)): ?>
-                      <h4><strong>Nama Dokter:</strong> <?php echo htmlspecialchars($dokter->nama); ?></h4>
-                    <?php endif; ?>
+  .dokter-info ul {
+    margin: 0 0 10px 20px;
+    padding: 0;
+  }
 
-                    <!-- Jadwal -->
-                    <?php if (!empty($dokter->jadwal)): ?>
-                      <h5><strong>Jadwal:</strong></h5>
-                      <?php foreach ($dokter->jadwal as $j): ?>
-                        <p><?php echo htmlspecialchars($j->jadwalDokter); ?></p>
-                      <?php endforeach; ?>
-                    <?php else: ?>
-                      <p><em>Jadwal belum tersedia</em></p>
-                    <?php endif; ?>
+  .dokter-info li {
+    line-height: 1.6;
+  }
 
-                    <!-- Layanan -->
-                    <?php if (!empty($dokter->daftarLayanan)): ?>
-                      <h5><strong>Layanan:</strong></h5>
-                      <ul>
-                        <?php foreach ($dokter->daftarLayanan as $layanan): ?>
-                          <li><?php echo htmlspecialchars($layanan->layanan); ?></li>
-                        <?php endforeach; ?>
-                      </ul>
-                    <?php endif; ?>
-                  </div>
-                </div>
+  @media (max-width: 768px) {
+    .dokter-container {
+      flex-direction: column;
+      text-align: center;
+      padding: 20px;
+    }
 
-                <hr>
+    .dokter-foto img {
+      width: 200px;
+      height: 260px;
+      margin-bottom: 15px;
+    }
 
-              <?php endforeach; ?>
-            <?php endif; ?>
+    .dokter-info {
+      text-align: left;
+    }
+  }
+</style>
 
+<?php if (!empty($dokter)): ?>
+  <!-- Judul halaman hanya nama poliklinik -->
+  <h2 class="text-center fw-bold mt-5 mb-4 text-dark">
+    <?= htmlspecialchars($data->data[0]->namaPoli ?? ''); ?>
+  </h2>
+  <hr class="mx-auto mb-5" style="width: 160px; border: 2px solid #cde0ff;">
+
+  <div class="dokter-container">
+    <!-- Foto Dokter -->
+    <div class="dokter-foto">
+      <?php if ($fotoUrl): ?>
+        <img src="http://localhost:1337<?= htmlspecialchars($fotoUrl); ?>" 
+             alt="<?= htmlspecialchars($dokter->nama ?? 'Dokter'); ?>">
+      <?php else: ?>
+        <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded"
+             style="width:260px;height:340px;">Tidak ada foto</div>
+      <?php endif; ?>
+    </div>
+
+    <!-- Info Dokter -->
+    <div class="dokter-info">
+      <h4><?= htmlspecialchars($dokter->nama ?? 'Nama Dokter'); ?></h4>
+
+      <!-- Jadwal -->
+      <div class="mb-3">
+        <h6>Jadwal :</h6>
+        <?php if (!empty($dokter->jadwal)): ?>
+          <?php foreach ($dokter->jadwal as $j): ?>
+            <p><?= htmlspecialchars($j->jadwalDokter); ?></p>
           <?php endforeach; ?>
         <?php else: ?>
-          <p>Tidak ada data dokter yang ditemukan.</p>
+          <p class="text-muted fst-italic mb-0">Belum ada jadwal</p>
         <?php endif; ?>
+      </div>
 
+      <!-- Layanan -->
+      <?php if (!empty($dokter->daftarLayanan)): ?>
+        <div>
+          <h6>Layanan:</h6>
+          <ul>
+            <?php foreach ($dokter->daftarLayanan as $layanan): ?>
+              <li><?= htmlspecialchars($layanan->layanan); ?></li>
+            <?php endforeach; ?>
+          </ul>
+        </div>
+      <?php endif; ?>
     </div>
-  </main>
+  </div>
+
+<?php else: ?>
+  <p class="text-center text-muted my-5">Tidak ada data dokter yang ditemukan.</p>
+<?php endif; ?>
+
   <!-- End Main -->
 
   <!-- Section Title -->

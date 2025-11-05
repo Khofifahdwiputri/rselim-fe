@@ -1,3 +1,78 @@
+<?php
+// URL endpoint Strapi
+$strapi_url = 'http://localhost:1337/api/home-page?populate=*';
+
+// Ambil data JSON dari Strapi
+$json_data = file_get_contents($strapi_url);
+
+if ($json_data === false) {
+    die('Gagal mengambil data dari Strapi.');
+}
+
+// Decode JSON
+$data = json_decode($json_data, true);
+
+// Cek apakah data valid
+if (!isset($data['data'])) {
+    die('Data Strapi tidak valid atau kosong.');
+}
+
+// Ambil data utama (langsung, tanpa attributes)
+$home_page_data = $data['data'];
+
+// Base URL Strapi
+$strapi_base_url = 'http://localhost:1337';
+
+// Fungsi bantu untuk ambil URL media
+function get_media_url($media_field, $base_url) {
+    if (isset($media_field['url'])) {
+        return $base_url . $media_field['url'];
+    }
+    // Coba ambil format medium kalau ada
+    if (isset($media_field['formats']['medium']['url'])) {
+        return $base_url . $media_field['formats']['medium']['url'];
+    }
+    // Jika ada thumbnail
+    if (isset($media_field['formats']['thumbnail']['url'])) {
+        return $base_url . $media_field['formats']['thumbnail']['url'];
+    }
+    return null;
+}
+
+// Welcome
+$welcome_image_url = get_media_url($home_page_data['welcome'], $strapi_base_url);
+
+// Jantung
+$jantung_image_url = get_media_url($home_page_data['jantung'], $strapi_base_url);
+
+// Data statistik
+$stats = $home_page_data['data'][0] ?? null;
+$jumlah_dokter = $stats['jumlah_dokter'] ?? 0;
+$jumlah_unit = $stats['jumlah_unit'] ?? 0;
+$jumlah_laboratorium = $stats['jumlah_laboratorium'] ?? 0;
+$jumlah_penghargaan = $stats['jumlah_penghargaan'] ?? 0;
+
+// Mata
+$mata_image_url = get_media_url($home_page_data['mata'], $strapi_base_url);
+
+// Kulit
+$kulit_image_url = get_media_url($home_page_data['kulit'], $strapi_base_url);
+
+// Layanan Unggulan
+$layanan_unggulan = $home_page_data['layanan_unggulan'] ?? [];
+
+// Layanan Medis
+$layanan_medis = $home_page_data['layanan_medis'] ?? [];
+
+// Akhir
+$akhir_image_url = get_media_url($home_page_data['akhir'], $strapi_base_url);
+
+// --- Debug (opsional) ---
+// echo "<pre>";
+// print_r($home_page_data);
+// echo "</pre>";
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -214,7 +289,7 @@
 
       <!-- Gambar -->
       <div class="col-lg-6 position-relative align-self-start" data-aos="fade-up" data-aos-delay="200">
-        <img src="assets/img/perawat.png" class="img-fluid" alt="Perawat RS Elim">
+        <img src="<?php echo $welcome_image_url; ?>" class="img-fluid" alt="Perawat RS Elim">
         <a href="https://www.youtube.com/watch?v=Y-gZniehpdo" class="glightbox pulsating-play-btn"></a>
       </div>
 
@@ -259,7 +334,7 @@
 
       <!-- ======= Image ======= -->
       <div class="col-lg-6 text-center" data-aos="fade-left">
-        <img src="assets/img/jantung.png" alt="Echocardiography" class="img-fluid rounded-circle" style="max-width: 450px;">
+        <img src="<?php echo $jantung_image_url; ?>" alt="Echocardiography" class="img-fluid rounded-circle" style="max-width: 450px;">
       </div>
     </div>
   </div>
@@ -271,7 +346,7 @@
       <div class="col-lg-3 col-md-6 d-flex flex-column align-items-center">
         <i class="fa-solid fa-user-doctor text-primary fs-1"></i>
         <div class="stats-item">
-          <span data-purecounter-start="0" data-purecounter-end="55" data-purecounter-duration="1" 
+          <span data-purecounter-start="0" data-purecounter-end="<?php echo $jumlah_dokter; ?>" data-purecounter-duration="1" 
                 class="purecounter text-primary fw-bold fs-2"></span>
           <p class="text-primary fw-semibold fs-5">Dokter</p>
         </div>
@@ -280,7 +355,7 @@
       <div class="col-lg-3 col-md-6 d-flex flex-column align-items-center">
         <i class="fa-regular fa-hospital text-primary fs-1"></i>
         <div class="stats-item">
-          <span data-purecounter-start="0" data-purecounter-end="27" data-purecounter-duration="1" 
+          <span data-purecounter-start="0" data-purecounter-end="<?php echo $jumlah_unit; ?>" data-purecounter-duration="1" 
                 class="purecounter text-primary fw-bold fs-2"></span>
           <p class="text-primary fw-semibold fs-5">Unit</p>
         </div>
@@ -289,7 +364,7 @@
       <div class="col-lg-3 col-md-6 d-flex flex-column align-items-center">
         <i class="fas fa-flask text-primary fs-1"></i>
         <div class="stats-item">
-          <span data-purecounter-start="0" data-purecounter-end="1" data-purecounter-duration="1" 
+          <span data-purecounter-start="0" data-purecounter-end="<?php echo $jumlah_laboratorium; ?>" data-purecounter-duration="1" 
                 class="purecounter text-primary fw-bold fs-2"></span>
           <p class="text-primary fw-semibold fs-5">Laboratorium</p>
         </div>
@@ -298,7 +373,7 @@
       <div class="col-lg-3 col-md-6 d-flex flex-column align-items-center">
         <i class="fas fa-award text-primary fs-1"></i>
         <div class="stats-item">
-          <span data-purecounter-start="0" data-purecounter-end="150" data-purecounter-duration="1" 
+          <span data-purecounter-start="0" data-purecounter-end="<?php echo $jumlah_penghargaan; ?>" data-purecounter-duration="1" 
                 class="purecounter text-primary fw-bold fs-2"></span>
           <p class="text-primary fw-semibold fs-5">Penghargaan</p>
         </div>
@@ -316,7 +391,7 @@
       
       <!-- Kolom Gambar -->
       <div class="col-md-5 text-center" data-aos="fade-right" data-aos-delay="200">
-          <img src="assets/img/mata.png" class="img-fluid" style="max-width: 450px;" alt="Fakoemulsifikasi">
+          <img src="<?php echo $mata_image_url; ?>" class="img-fluid" style="max-width: 450px;" alt="Fakoemulsifikasi">
       </div>
 
       <!-- Kolom Teks -->
@@ -371,7 +446,7 @@
       </div>
       <!-- Image -->
       <div class="col-lg-6 text-center" data-aos="fade-left">
-        <img src="assets/img/laser.png" alt="Laser Helios" class="img-fluid" style="max-width: 480px;">
+        <img src="<?php echo $kulit_image_url; ?>" alt="Laser Helios" class="img-fluid" style="max-width: 480px;">
       </div>
     </div>
   </div>
@@ -384,57 +459,54 @@
     <h2 class="text-center fw-bold mb-5">Layanan Unggulan</h2>
     <div class="row g-4">
 
-      <!-- Card 1 -->
-      <div class="col-md-3 col-sm-6" data-aos="zoom-in" data-aos-delay="100">
-        <div class="card shadow-lg border-0 h-100 text-center">
-          <img src="assets/img/medical1.png" 
-               class="card-img-top mx-auto d-block p-2 rounded" 
-               style="max-width: 200px; height: auto;" 
-               alt="Medical Check Up Jantung">
-          <div class="card-body">
-            <h6 class="fw-bold fs-6">Medical Check Up Jantung</h6>
-          </div>
+      <?php foreach ($layanan_unggulan as $index => $layanan) : ?>
+        <?php
+        $jantung_url = $strapi_base_url . $layanan['jantung']['url'];
+        $umum_url = $strapi_base_url . $layanan['umum']['url'];
+        $pelajar_url = $strapi_base_url . $layanan['pelajar']['url'];
+        $paru_url = $strapi_base_url . $layanan['paru']['url'];
+        ?>
+        <?php echo $jantung_url; ?>
+        <!-- Card 1 -->
+        <div class="col-md-3 col-sm-6" data-aos="zoom-in" data-aos-delay="100">
+            <div class="card shadow-lg border-0 h-100 text-center">
+                <img src="<?php echo $jantung_url; ?>" class="card-img-top mx-auto d-block p-2 rounded" style="max-width: 200px; height: auto;" alt="Medical Check Up Jantung">
+                <div class="card-body">
+                    <h6 class="fw-bold fs-6">Medical Check Up Jantung</h6>
+                </div>
+            </div>
         </div>
-      </div>
 
-      <!-- Card 2 -->
-      <div class="col-md-3 col-sm-6" data-aos="zoom-in" data-aos-delay="200">
-        <div class="card shadow-lg border-0 h-100 text-center">
-          <img src="assets/img/medical2.png" 
-               class="card-img-top mx-auto d-block p-2 rounded" 
-               style="max-width: 200px; height: auto;" 
-               alt="Medical Check Up Umum">
-          <div class="card-body">
-            <h6 class="fw-bold fs-6">Medical Check Up Umum</h6>
-          </div>
+        <!-- Card 2 -->
+        <div class="col-md-3 col-sm-6" data-aos="zoom-in" data-aos-delay="200">
+            <div class="card shadow-lg border-0 h-100 text-center">
+                <img src="<?php echo $umum_url; ?>" class="card-img-top mx-auto d-block p-2 rounded" style="max-width: 200px; height: auto;" alt="Medical Check Up Umum">
+                <div class="card-body">
+                    <h6 class="fw-bold fs-6">Medical Check Up Umum</h6>
+                </div>
+            </div>
         </div>
-      </div>
 
-      <!-- Card 3 -->
-      <div class="col-md-3 col-sm-6" data-aos="zoom-in" data-aos-delay="300">
-        <div class="card shadow-lg border-0 h-100 text-center">
-          <img src="assets/img/medical3.png" 
-               class="card-img-top mx-auto d-block p-2 rounded" 
-               style="max-width: 200px; height: auto;" 
-               alt="Medical Check Up Pelajar">
-          <div class="card-body">
-            <h6 class="fw-bold fs-6">Medical Check Up Pelajar</h6>
-          </div>
+        <!-- Card 3 -->
+        <div class="col-md-3 col-sm-6" data-aos="zoom-in" data-aos-delay="300">
+            <div class="card shadow-lg border-0 h-100 text-center">
+                <img src="<?php echo $pelajar_url; ?>" class="card-img-top mx-auto d-block p-2 rounded" style="max-width: 200px; height: auto;" alt="Medical Check Up Pelajar">
+                <div class="card-body">
+                    <h6 class="fw-bold fs-6">Medical Check Up Pelajar</h6>
+                </div>
+            </div>
         </div>
-      </div>
 
-      <!-- Card 4 -->
-      <div class="col-md-3 col-sm-6" data-aos="zoom-in" data-aos-delay="400">
-        <div class="card shadow-lg border-0 h-100 text-center">
-          <img src="assets/img/medical4.png" 
-               class="card-img-top mx-auto d-block p-2 rounded" 
-               style="max-width: 200px; height: auto;" 
-               alt="Medical Check Up Paru">
-          <div class="card-body">
-            <h6 class="fw-bold fs-6">Medical Check Up Paru</h6>
-          </div>
+        <!-- Card 4 -->
+        <div class="col-md-3 col-sm-6" data-aos="zoom-in" data-aos-delay="400">
+            <div class="card shadow-lg border-0 h-100 text-center">
+                <img src="<?php echo $paru_url; ?>" class="card-img-top mx-auto d-block p-2 rounded" style="max-width: 200px; height: auto;" alt="Medical Check Up Paru">
+                <div class="card-body">
+                    <h6 class="fw-bold fs-6">Medical Check Up Paru</h6>
+                </div>
+            </div>
         </div>
-      </div>
+      <?php endforeach; ?>
 
     </div>
   </div>
@@ -458,93 +530,119 @@
       <div class="col-md-8">
         <div class="row g-3">
           
-          <!-- Item 1 -->
-          <div class="col-6 col-md-4">
-            <div class="position-relative">
-              <img src="assets/img/ugd.png" class="img-fluid w-100" alt="UGD" style="height:150px; object-fit:cover;">
-              <div class="position-absolute top-0 start-0 w-100 h-100" style="background:rgba(0,0,0,0.4);"></div>
-              <div class="position-absolute top-0 start-0 text-white p-2">
-                <h6 class="fw-bold m-0">01. UGD</h6>
-              </div>
-            </div>
-          </div>
+          <?php
+          $layanan_medis_items = [
+              'ugd' => 'UGD',
+              'rawat_jalan' => 'Rawat Jalan',
+              'rawat_inap' => 'Rawat Inap',
+              'layanan_pengunjung' => 'Layanan Penunjang',
+              'arrang_beauty' => 'Arrang Beauty & Wellness Center',
+              'home_care' => 'Home Care',
+              'ruang_operasi' => 'Ruang Operasi',
+              'mcu' => 'MCU'
+          ];
+          $count = 1;
+          ?>
 
-          <!-- Item 2 -->
-          <div class="col-6 col-md-4">
-            <div class="position-relative">
-              <img src="assets/img/rawatjalan.png" class="img-fluid w-100" alt="Rawat Jalan" style="height:150px; object-fit:cover;">
-              <div class="position-absolute top-0 start-0 w-100 h-100" style="background:rgba(0,0,0,0.4);"></div>
-              <div class="position-absolute top-0 start-0 text-white p-2">
-                <h6 class="fw-bold m-0">02. Rawat Jalan</h6>
-              </div>
+          <?php foreach ($layanan_medis as $item) : ?>
+            <?php
+            $ugd_url = $strapi_base_url . $item['ugd']['data']['attributes']['url'];
+            $rawat_jalan_url = $strapi_base_url . $item['rawat_jalan']['data']['attributes']['url'];
+            $rawat_inap_url = $strapi_base_url . $item['rawat_inap']['data']['attributes']['url'];
+            $layanan_pengunjung_url = $strapi_base_url . $item['layanan_pengunjung']['data']['attributes']['url'];
+            $arrang_beauty_url = $strapi_base_url . $item['arrang_beauty']['data']['attributes']['url'];
+            $home_care_url = $strapi_base_url . $item['home_care']['data']['attributes']['url'];
+            $ruang_operasi_url = $strapi_base_url . $item['ruang_operasi']['data']['attributes']['url'];
+            $mcu_url = $strapi_base_url . $item['mcu']['data']['attributes']['url'];
+            ?>
+             <!-- Item 1 -->
+            <div class="col-6 col-md-4">
+                <div class="position-relative">
+                    <img src="<?php echo $ugd_url; ?>" class="img-fluid w-100" alt="UGD" style="height:150px; object-fit:cover;">
+                    <div class="position-absolute top-0 start-0 w-100 h-100" style="background:rgba(0,0,0,0.4);"></div>
+                    <div class="position-absolute top-0 start-0 text-white p-2">
+                        <h6 class="fw-bold m-0">01. UGD</h6>
+                    </div>
+                </div>
             </div>
-          </div>
 
-          <!-- Item 3 -->
-          <div class="col-6 col-md-4">
-            <div class="position-relative">
-              <img src="assets/img/rawatinap.png" class="img-fluid w-100" alt="Rawat Inap" style="height:150px; object-fit:cover;">
-              <div class="position-absolute top-0 start-0 w-100 h-100" style="background:rgba(0,0,0,0.4);"></div>
-              <div class="position-absolute top-0 start-0 text-white p-2">
-                <h6 class="fw-bold m-0">03. Rawat Inap</h6>
-              </div>
+            <!-- Item 2 -->
+            <div class="col-6 col-md-4">
+                <div class="position-relative">
+                    <img src="<?php echo $rawat_jalan_url; ?>" class="img-fluid w-100" alt="Rawat Jalan" style="height:150px; object-fit:cover;">
+                    <div class="position-absolute top-0 start-0 w-100 h-100" style="background:rgba(0,0,0,0.4);"></div>
+                    <div class="position-absolute top-0 start-0 text-white p-2">
+                        <h6 class="fw-bold m-0">02. Rawat Jalan</h6>
+                    </div>
+                </div>
             </div>
-          </div>
 
-          <!-- Item 4 -->
-          <div class="col-6 col-md-4">
-            <div class="position-relative">
-              <img src="assets/img/penunjang.png" class="img-fluid w-100" alt="Layanan Penunjang" style="height:150px; object-fit:cover;">
-              <div class="position-absolute top-0 start-0 w-100 h-100" style="background:rgba(0,0,0,0.4);"></div>
-              <div class="position-absolute top-0 start-0 text-white p-2">
-                <h6 class="fw-bold m-0">04. Layanan Penunjang</h6>
-              </div>
+            <!-- Item 3 -->
+            <div class="col-6 col-md-4">
+                <div class="position-relative">
+                    <img src="<?php echo $rawat_inap_url; ?>" class="img-fluid w-100" alt="Rawat Inap" style="height:150px; object-fit:cover;">
+                    <div class="position-absolute top-0 start-0 w-100 h-100" style="background:rgba(0,0,0,0.4);"></div>
+                    <div class="position-absolute top-0 start-0 text-white p-2">
+                        <h6 class="fw-bold m-0">03. Rawat Inap</h6>
+                    </div>
+                </div>
             </div>
-          </div>
 
-          <!-- Item 5 -->
-          <div class="col-6 col-md-4">
-            <div class="position-relative">
-              <img src="assets/img/arrang.jpg" class="img-fluid w-100" alt="Arrang Beauty & Wellness Center" style="height:150px; object-fit:cover;">
-              <div class="position-absolute top-0 start-0 w-100 h-100" style="background:rgba(0,0,0,0.4);"></div>
-              <div class="position-absolute top-0 start-0 text-white p-2">
-                <h6 class="fw-bold m-0">05. Arrang Beauty & Wellness Center</h6>
-              </div>
+            <!-- Item 4 -->
+            <div class="col-6 col-md-4">
+                <div class="position-relative">
+                    <img src="<?php echo $layanan_pengunjung_url; ?>" class="img-fluid w-100" alt="Layanan Penunjang" style="height:150px; object-fit:cover;">
+                    <div class="position-absolute top-0 start-0 w-100 h-100" style="background:rgba(0,0,0,0.4);"></div>
+                    <div class="position-absolute top-0 start-0 text-white p-2">
+                        <h6 class="fw-bold m-0">04. Layanan Penunjang</h6>
+                    </div>
+                </div>
             </div>
-          </div>
 
-          <!-- Item 6 -->
-          <div class="col-6 col-md-4">
-            <div class="position-relative">
-              <img src="assets/img/homecare.jpg" class="img-fluid w-100" alt="Home Care" style="height:150px; object-fit:cover;">
-              <div class="position-absolute top-0 start-0 w-100 h-100" style="background:rgba(0,0,0,0.4);"></div>
-              <div class="position-absolute top-0 start-0 text-white p-2">
-                <h6 class="fw-bold m-0">06. Home Care</h6>
-              </div>
+            <!-- Item 5 -->
+            <div class="col-6 col-md-4">
+                <div class="position-relative">
+                    <img src="<?php echo $arrang_beauty_url; ?>" class="img-fluid w-100" alt="Arrang Beauty & Wellness Center" style="height:150px; object-fit:cover;">
+                    <div class="position-absolute top-0 start-0 w-100 h-100" style="background:rgba(0,0,0,0.4);"></div>
+                    <div class="position-absolute top-0 start-0 text-white p-2">
+                        <h6 class="fw-bold m-0">05. Arrang Beauty & Wellness Center</h6>
+                    </div>
+                </div>
             </div>
-          </div>
 
-          <!-- Item 7 -->
-          <div class="col-6 col-md-4">
-            <div class="position-relative">
-              <img src="assets/img/ruangoperasi.jpg" class="img-fluid w-100" alt="Ruang Operasi" style="height:150px; object-fit:cover;">
-              <div class="position-absolute top-0 start-0 w-100 h-100" style="background:rgba(0,0,0,0.4);"></div>
-              <div class="position-absolute top-0 start-0 text-white p-2">
-                <h6 class="fw-bold m-0">07. Ruang Operasi</h6>
-              </div>
+            <!-- Item 6 -->
+            <div class="col-6 col-md-4">
+                <div class="position-relative">
+                    <img src="<?php echo $home_care_url; ?>" class="img-fluid w-100" alt="Home Care" style="height:150px; object-fit:cover;">
+                    <div class="position-absolute top-0 start-0 w-100 h-100" style="background:rgba(0,0,0,0.4);"></div>
+                    <div class="position-absolute top-0 start-0 text-white p-2">
+                        <h6 class="fw-bold m-0">06. Home Care</h6>
+                    </div>
+                </div>
             </div>
-          </div>
 
-          <!-- Item 8 -->
-          <div class="col-6 col-md-4">
-            <div class="position-relative">
-              <img src="assets/img/mcu.jpg" class="img-fluid w-100" alt="MCU" style="height:150px; object-fit:cover;">
-              <div class="position-absolute top-0 start-0 w-100 h-100" style="background:rgba(0,0,0,0.4);"></div>
-              <div class="position-absolute top-0 start-0 text-white p-2">
-                <h6 class="fw-bold m-0">08. MCU</h6>
-              </div>
+            <!-- Item 7 -->
+            <div class="col-6 col-md-4">
+                <div class="position-relative">
+                    <img src="<?php echo $ruang_operasi_url; ?>" class="img-fluid w-100" alt="Ruang Operasi" style="height:150px; object-fit:cover;">
+                    <div class="position-absolute top-0 start-0 w-100 h-100" style="background:rgba(0,0,0,0.4);"></div>
+                    <div class="position-absolute top-0 start-0 text-white p-2">
+                        <h6 class="fw-bold m-0">07. Ruang Operasi</h6>
+                    </div>
+                </div>
             </div>
-          </div>
+
+            <!-- Item 8 -->
+            <div class="col-6 col-md-4">
+                <div class="position-relative">
+                    <img src="<?php echo $mcu_url; ?>" class="img-fluid w-100" alt="MCU" style="height:150px; object-fit:cover;">
+                    <div class="position-absolute top-0 start-0 w-100 h-100" style="background:rgba(0,0,0,0.4);"></div>
+                    <div class="position-absolute top-0 start-0 text-white p-2">
+                        <h6 class="fw-bold m-0">08. MCU</h6>
+                    </div>
+                </div>
+            </div>
+          <?php endforeach; ?>
 
         </div>
       </div>
@@ -590,7 +688,7 @@
 
       <!-- Kolom Gambar -->
       <div class="col-md-6 d-flex">
-        <img src="assets/img/aldi.jpg" 
+        <img src="<?php echo $akhir_image_url; ?>" 
              alt="Perawat RS Elim Rantepao" 
              class="img-fluid w-100" 
              style="object-fit: cover; max-height: 250px;">
@@ -814,4 +912,3 @@
 </body>
 
 </html>
-     
