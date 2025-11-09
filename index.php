@@ -58,11 +58,15 @@ $mata_image_url = get_media_url($home_page_data['mata'], $strapi_base_url);
 // Kulit
 $kulit_image_url = get_media_url($home_page_data['kulit'], $strapi_base_url);
 
+$strapi_url_2 = 'http://localhost:1337/api/home-page?populate[layanan_unggulan][populate]=*&populate[layanan_medis][populate]=*';
+$json_data_2 = file_get_contents($strapi_url_2);
+$data_2 = json_decode($json_data_2, true);
+$home_page_data_2 = $data_2['data'];
 // Layanan Unggulan
-$layanan_unggulan = $home_page_data['layanan_unggulan'] ?? [];
+$layanan_unggulan = $home_page_data_2['layanan_unggulan'] ?? [];
 
 // Layanan Medis
-$layanan_medis = $home_page_data['layanan_medis'] ?? [];
+$layanan_medis = $home_page_data_2['layanan_medis'] ?? [];
 
 // Akhir
 $akhir_image_url = get_media_url($home_page_data['akhir'], $strapi_base_url);
@@ -466,7 +470,6 @@ $akhir_image_url = get_media_url($home_page_data['akhir'], $strapi_base_url);
         $pelajar_url = $strapi_base_url . $layanan['pelajar']['url'];
         $paru_url = $strapi_base_url . $layanan['paru']['url'];
         ?>
-        <?php echo $jantung_url; ?>
         <!-- Card 1 -->
         <div class="col-md-3 col-sm-6" data-aos="zoom-in" data-aos-delay="100">
             <div class="card shadow-lg border-0 h-100 text-center">
@@ -546,14 +549,14 @@ $akhir_image_url = get_media_url($home_page_data['akhir'], $strapi_base_url);
 
           <?php foreach ($layanan_medis as $item) : ?>
             <?php
-            $ugd_url = $strapi_base_url . $item['ugd']['data']['attributes']['url'];
-            $rawat_jalan_url = $strapi_base_url . $item['rawat_jalan']['data']['attributes']['url'];
-            $rawat_inap_url = $strapi_base_url . $item['rawat_inap']['data']['attributes']['url'];
-            $layanan_pengunjung_url = $strapi_base_url . $item['layanan_pengunjung']['data']['attributes']['url'];
-            $arrang_beauty_url = $strapi_base_url . $item['arrang_beauty']['data']['attributes']['url'];
-            $home_care_url = $strapi_base_url . $item['home_care']['data']['attributes']['url'];
-            $ruang_operasi_url = $strapi_base_url . $item['ruang_operasi']['data']['attributes']['url'];
-            $mcu_url = $strapi_base_url . $item['mcu']['data']['attributes']['url'];
+            $ugd_url = $strapi_base_url . $item['ugd']['url'];
+            $rawat_jalan_url = $strapi_base_url . $item['rawat_jalan']['url'];
+            $rawat_inap_url = $strapi_base_url . $item['rawat_inap']['url'];
+            $layanan_penunjang_url = $strapi_base_url . $item['layanan_penunjang']['url'];
+            $arrang_beauty_url = $strapi_base_url . $item['arrang_beauty']['url'];
+            $home_care_url = $strapi_base_url . $item['home_care']['url'];
+            $ruang_operasi_url = $strapi_base_url . $item['ruang_operasi']['url'];
+            $mcu_url = $strapi_base_url . $item['mcu']['url'];
             ?>
              <!-- Item 1 -->
             <div class="col-6 col-md-4">
